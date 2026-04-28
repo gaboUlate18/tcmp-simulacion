@@ -4,28 +4,28 @@ import time
 
 st.set_page_config(page_title="TCMP Industrial", layout="wide")
 
-# ===== ESTILOS INDUSTRIALES =====
+# ===== ESTILOS INDUSTRIALES (MODO NOCTURNO) =====
 st.markdown("""
 <style>
 body {
-    background-color: #0e1117;
+    background-color: #0b0f14;
 }
 
 .panel {
-    background-color: #1c1f26;
+    background-color: #161b22;
     padding: 20px;
     border-radius: 12px;
-    border: 1px solid #333;
+    border: 1px solid #30363d;
 }
 
 .titulo {
-    font-size: 28px;
+    font-size: 30px;
     font-weight: bold;
-    color: #00d4ff;
+    color: #00e5ff;
 }
 
 .alerta {
-    background-color: #ff2e2e;
+    background-color: #ff3b3b;
     color: white;
     padding: 25px;
     border-radius: 10px;
@@ -43,37 +43,46 @@ body {
 }
 
 .metric-box {
-    background-color: #11151c;
+    background-color: #0d1117;
     padding: 15px;
     border-radius: 10px;
     text-align: center;
+    border: 1px solid #30363d;
+}
+
+input {
+    background-color: #0d1117 !important;
+    color: white !important;
 }
 </style>
 """, unsafe_allow_html=True)
 
+# ===== CONSTANTE DEL SISTEMA =====
+UMBRAL = 2.0  # ppm fijo según diseño
+
 # ===== HEADER =====
 st.markdown("<div class='titulo'>TCMP - Torre de Control de Materia Prima</div>", unsafe_allow_html=True)
-st.write("Sistema automatizado de detección de metales pesados (Simulación)")
+st.write("Simulación de inspección automatizada con umbral fijo de seguridad (2.0 ppm)")
 
 st.divider()
 
-# ===== CONFIGURACIÓN =====
+# ===== INPUT DEL USUARIO =====
 col1, col2 = st.columns(2)
 
 with col1:
-    umbral = st.slider("Umbral permitido (ppm)", 0.5, 5.0, 2.0)
+    lote = st.text_input("ID del lote", value=f"L-{random.randint(1000,9999)}")
 
 with col2:
-    lote = st.text_input("ID del lote", value=f"L-{random.randint(1000,9999)}")
+    nivel_input = st.number_input("Nivel de plomo a evaluar (ppm)", min_value=0.0, max_value=10.0, value=1.0, step=0.1)
 
 st.divider()
 
 # ===== BOTÓN PRINCIPAL =====
-if st.button("🔍 Iniciar inspección", use_container_width=True):
+if st.button("🔍 Ejecutar inspección", use_container_width=True):
 
     with st.spinner("Analizando muestra con XRF..."):
-        time.sleep(2)
-        nivel = round(random.uniform(0.5, 5.0), 2)
+        time.sleep(1.5)
+        nivel = round(nivel_input, 2)
 
     st.divider()
 
@@ -82,18 +91,18 @@ if st.button("🔍 Iniciar inspección", use_container_width=True):
 
     m1.markdown(f"<div class='metric-box'><h3>{lote}</h3><p>Lote</p></div>", unsafe_allow_html=True)
     m2.markdown(f"<div class='metric-box'><h3>{nivel} ppm</h3><p>Plomo detectado</p></div>", unsafe_allow_html=True)
-    m3.markdown(f"<div class='metric-box'><h3>{umbral} ppm</h3><p>Umbral</p></div>", unsafe_allow_html=True)
+    m3.markdown(f"<div class='metric-box'><h3>{UMBRAL} ppm</h3><p>Umbral fijo</p></div>", unsafe_allow_html=True)
 
     st.divider()
 
     # ===== RESULTADO =====
-    if nivel > umbral:
+    if nivel > UMBRAL:
         st.markdown(f"""
         <div class='alerta'>
         ⚠️ ALERTA DE SEGURIDAD<br><br>
         LOTE RECHAZADO<br><br>
         Nivel detectado: {nivel} ppm<br>
-        Límite permitido: {umbral} ppm<br><br>
+        Límite permitido: {UMBRAL} ppm<br><br>
         🔒 INTERLOCK ACTIVADO<br>
         Descarga bloqueada automáticamente
         </div>
